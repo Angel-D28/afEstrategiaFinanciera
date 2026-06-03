@@ -1,0 +1,24 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: af_financiera_db
+    environment:
+      POSTGRES_DB: af_estrategia_financiera
+      POSTGRES_USER: af_user
+      POSTGRES_PASSWORD: af_pass123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - af_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: af_financiera_data
+
+networks:
+  af_network:
+    driver: bridge

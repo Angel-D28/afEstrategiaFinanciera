@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.af</groupId>
-	<artifactId>estrategia-financiera</artifactId>
+	<artifactId>estrategiafinanciera</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>

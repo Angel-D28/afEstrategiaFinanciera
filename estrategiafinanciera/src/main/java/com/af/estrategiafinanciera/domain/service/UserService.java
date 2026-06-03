@@ -24,7 +24,7 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
     @Override
     public User register (String name , String email, String password){
         //No permitira email duplicados
-        if (userRepositoryPort.existByEmail(email)){
+        if (userRepositoryPort.existsByEmail(email)){
             throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
         }
         User newUser = new User();

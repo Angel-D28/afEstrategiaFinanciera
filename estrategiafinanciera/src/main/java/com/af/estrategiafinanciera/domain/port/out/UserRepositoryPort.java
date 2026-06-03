@@ -12,6 +12,6 @@ public interface UserRepositoryPort {
     Optional<User> findByEmail(String email);
     List<User> findAll();
     List<User> findAllByRole(Role role);
-    boolean existByEmail(String email);
+    boolean existsByEmail(String email);
     void deleteById(Long id);
 }

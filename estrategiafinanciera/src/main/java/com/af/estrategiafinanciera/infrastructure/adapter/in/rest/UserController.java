@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class UserController {
     private final UpdateUserStatusUseCase updateUserStatusUseCase;
     private final GetUserUseCase getUserUseCase;
 
+    //Publico
     // POST /api/users/register
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register (@Valid @RequestBody CreateUserRequest request){
@@ -34,8 +36,11 @@ public class UserController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(user));
     }
+
+    //Solo Admin
     // GET /api/users
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAll(){
         List<UserResponse> users = getUserUseCase.getAll()
                 .stream()
@@ -46,6 +51,7 @@ public class UserController {
 
     // GET /api/users/{id}
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id){
         User user = getUserUseCase.getById(id);
         return ResponseEntity.ok(toResponse(user));
@@ -53,12 +59,23 @@ public class UserController {
 
     // PATCH /api/users/{id}/status
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserStatusRequest request){
         User user = updateUserStatusUseCase.updateStatus(id, request.status());
         return ResponseEntity.ok(toResponse(user));
     }
+
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getMyProfile(
+            org.springframework.security.core.Authentication authentication){
+        User user = getUserUseCase.getByEmail(authentication.getName());
+        return ResponseEntity.ok(toResponse(user));
+    }
+
 
     // Método privado para convertir User → UserResponse
     private UserResponse toResponse(User user){

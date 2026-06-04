@@ -1,4 +1,4 @@
-package com.af.estrategiafinanciera.infrastructure.adapter;
+package com.af.estrategiafinanciera.infrastructure.adapter.in.rest;
 
 import com.af.estrategiafinanciera.application.dto.AuthResponse;
 import com.af.estrategiafinanciera.application.dto.LoginRequest;

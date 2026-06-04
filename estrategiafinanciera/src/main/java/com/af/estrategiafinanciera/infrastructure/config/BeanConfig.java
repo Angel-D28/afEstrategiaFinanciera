@@ -2,7 +2,9 @@ package com.af.estrategiafinanciera.infrastructure.config;
 
 
 import com.af.estrategiafinanciera.domain.port.out.PasswordEncoderPort;
+import com.af.estrategiafinanciera.domain.port.out.PlanRepositoryPort;
 import com.af.estrategiafinanciera.domain.port.out.UserRepositoryPort;
+import com.af.estrategiafinanciera.domain.service.PlanService;
 import com.af.estrategiafinanciera.domain.service.UserService;
 import com.af.estrategiafinanciera.infrastructure.security.AuthService;
 import com.af.estrategiafinanciera.infrastructure.security.JwtService;
@@ -18,6 +20,10 @@ public class BeanConfig {
     public UserService userService(UserRepositoryPort userRepositoryPort,
                                    PasswordEncoderPort passwordEncoderPort){
         return new UserService(userRepositoryPort, passwordEncoderPort);
+    }
+    @Bean
+    public PlanService planService(PlanRepositoryPort planRepositoryPort){
+        return new PlanService(planRepositoryPort);
     }
     @Bean
     public AuthService authService(UserRepositoryPort userRepositoryPort,

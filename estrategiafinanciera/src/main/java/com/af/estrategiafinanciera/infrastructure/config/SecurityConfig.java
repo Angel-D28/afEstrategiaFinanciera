@@ -5,6 +5,7 @@ import com.af.estrategiafinanciera.infrastructure.security.UserDetailsServiceImp
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,6 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/register").permitAll()
+                        .requestMatchers("/api/plans/active").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/plans/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

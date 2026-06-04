@@ -6,6 +6,7 @@ import com.af.estrategiafinanciera.domain.model.UserStatus;
 import com.af.estrategiafinanciera.domain.port.in.GetUserUseCase;
 import com.af.estrategiafinanciera.domain.port.in.RegisterUserUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdateUserStatusUseCase;
+import com.af.estrategiafinanciera.domain.port.out.PasswordEncoderPort;
 import com.af.estrategiafinanciera.domain.port.out.UserRepositoryPort;
 
 import java.time.LocalDateTime;
@@ -14,9 +15,12 @@ import java.util.List;
 public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase, GetUserUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
+    private final PasswordEncoderPort passwordEncoderPort;
 
-    public UserService(UserRepositoryPort userRepositoryPort){
+    public UserService(UserRepositoryPort userRepositoryPort,
+                       PasswordEncoderPort passwordEncoderPort){
         this.userRepositoryPort = userRepositoryPort;
+        this.passwordEncoderPort = passwordEncoderPort;
     }
 
     //RegisterUserUseCase
@@ -30,7 +34,7 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
         User newUser = new User();
         newUser.setName(name);
         newUser.setEmail(email);
-        newUser.setPassword(password);
+        newUser.setPassword(passwordEncoderPort.encode(password));
         newUser.setRole(Role.CLIENT);
         newUser.setStatus(UserStatus.PENDING);
         newUser.setCreatedAt(LocalDateTime.now());

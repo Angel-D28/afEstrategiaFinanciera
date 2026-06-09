@@ -9,5 +9,5 @@
 /dataSources/
 /dataSources.local.xml
 # Variables de entorno
-.env
-*.env
+../.env
+../.env*

@@ -1,5 +1,8 @@
 package com.af.estrategiafinanciera.domain.service;
 
+import com.af.estrategiafinanciera.domain.exception.DuplicateResourceException;
+import com.af.estrategiafinanciera.domain.exception.InvalidOperationException;
+import com.af.estrategiafinanciera.domain.exception.ResourceNotFoundException;
 import com.af.estrategiafinanciera.domain.model.Plan;
 import com.af.estrategiafinanciera.domain.model.PlanStatus;
 import com.af.estrategiafinanciera.domain.port.in.CreatePlanUseCase;
@@ -23,19 +26,13 @@ public class PlanService implements CreatePlanUseCase, GetPlanUseCase, UpdatePla
     public Plan create(String name, String description, BigDecimal price,
                        Integer durationMonths, List<String> features){
         if (planRepositoryPort.existsByName(name)){
-            throw new IllegalArgumentException(
-                    "Existe un Plan con el mismo nombre: " + name
-            );
+            throw new DuplicateResourceException("plan", "nombre", name);
         }
         if (price.compareTo(BigDecimal.ZERO) < 0){
-            throw new IllegalArgumentException(
-                    "El precio no puede ser negativo"
-            );
+            throw new InvalidOperationException("El precio no puede ser negativo");
         }
         if (durationMonths < 1){
-            throw new IllegalArgumentException(
-                    "La duracion minima es de 1 mes"
-            );
+            throw new InvalidOperationException("La duracion minima es 1 mes");
         }
         Plan plan = new Plan();
         plan.setName(name);
@@ -55,9 +52,7 @@ public class PlanService implements CreatePlanUseCase, GetPlanUseCase, UpdatePla
                       BigDecimal price, Integer durationMonths,
                       List<String> features){
         Plan plan = planRepositoryPort.findByid(id)
-                .orElseThrow(()-> new IllegalArgumentException(
-                        "No existe un plan con el id " + id
-                ));
+                .orElseThrow(()-> new ResourceNotFoundException("Plan", id));
 
         plan.setName(name);
         plan.setDescription(description);
@@ -72,17 +67,14 @@ public class PlanService implements CreatePlanUseCase, GetPlanUseCase, UpdatePla
     @Override
     public Plan updateStatus(Long id, PlanStatus status){
         Plan plan = planRepositoryPort.findByid(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Plan no encontrado con id: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan", id));
 
         switch (status){
             case ACTIVE -> plan.activate();
             case INACTIVE -> plan.deactivate();
             case DRAFT -> plan.draft();
-            default -> throw new IllegalArgumentException(
-                    "Estado no valido: " + status
-            );
+            default -> throw new InvalidOperationException(
+                    "Estado no válido: " + status);
         }
         return planRepositoryPort.save(plan);
     }
@@ -92,9 +84,7 @@ public class PlanService implements CreatePlanUseCase, GetPlanUseCase, UpdatePla
     @Override
     public Plan getByid(Long id) {
         return planRepositoryPort.findByid(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Plan no encontrado con id: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan", id));
     }
 
     @Override

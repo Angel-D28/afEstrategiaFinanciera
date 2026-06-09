@@ -1,5 +1,7 @@
 package com.af.estrategiafinanciera.domain.service;
 
+import com.af.estrategiafinanciera.domain.exception.InvalidOperationException;
+import com.af.estrategiafinanciera.domain.exception.ResourceNotFoundException;
 import com.af.estrategiafinanciera.domain.model.*;
 import com.af.estrategiafinanciera.domain.port.in.CreatePaymentUseCase;
 import com.af.estrategiafinanciera.domain.port.in.GetPaymentUseCase;
@@ -24,17 +26,17 @@ public class PaymentService implements CreatePaymentUseCase, UpdatePaymentStatus
     @Override
     public Payment registerPayment(Long subscriptionId, BigDecimal amount, PaymentMethod method, String reference, String notes) {
         Subscription subscription = subscriptionRepositoryPort.findByid(subscriptionId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Suscripcion no encontrada con ID " + subscriptionId
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Suscripcion", subscriptionId
                 ));
         if (amount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException(
+            throw new InvalidOperationException(
                     "El monto debe ser mayor a 0"
             );
         }
 
         if(subscription.getStatus() == SubscriptionStatus.CANCELLED){
-            throw new IllegalArgumentException(
+            throw new InvalidOperationException(
                     "No se puede registrar pago para una suscripción cancelada"
             );
         }
@@ -56,14 +58,14 @@ public class PaymentService implements CreatePaymentUseCase, UpdatePaymentStatus
     @Override
     public Payment updateStatus(Long paymentId, PaymentStatus status) {
         Payment payment = paymentRepositoryPort.findById(paymentId)
-                .orElseThrow(()-> new IllegalArgumentException(
-                        "No existe un pago con id " + paymentId
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "Pago", paymentId
                 ));
         switch (status){
             case FAILED -> payment.fail();
             case COMPLETED -> payment.complete();
             case REFUNDED -> payment.refund();
-            default -> throw new IllegalArgumentException(
+            default -> throw new InvalidOperationException(
                     "Estado no Valido : "+ status
             );
         }
@@ -73,8 +75,8 @@ public class PaymentService implements CreatePaymentUseCase, UpdatePaymentStatus
     @Override
     public Payment getByid(Long id) {
         return paymentRepositoryPort.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Pago no encontrado con id: " + id
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Pago" , id
                 ));
     }
 

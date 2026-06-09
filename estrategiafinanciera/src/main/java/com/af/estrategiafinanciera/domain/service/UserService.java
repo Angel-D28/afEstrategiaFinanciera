@@ -1,5 +1,8 @@
 package com.af.estrategiafinanciera.domain.service;
 
+import com.af.estrategiafinanciera.domain.exception.DuplicateResourceException;
+import com.af.estrategiafinanciera.domain.exception.InvalidOperationException;
+import com.af.estrategiafinanciera.domain.exception.ResourceNotFoundException;
 import com.af.estrategiafinanciera.domain.model.Role;
 import com.af.estrategiafinanciera.domain.model.User;
 import com.af.estrategiafinanciera.domain.model.UserStatus;
@@ -29,7 +32,7 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
     public User register (String name , String email, String password){
         //No permitira email duplicados
         if (userRepositoryPort.existsByEmail(email)){
-            throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
+            throw new DuplicateResourceException("usuario", "email", email);
         }
         User newUser = new User();
         newUser.setName(name);
@@ -48,13 +51,14 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
     @Override
     public User updateStatus(Long userId , UserStatus newStatus){
         User user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", userId));
 
         switch (newStatus){
             case ACTIVE -> user.activate();
             case INACTIVE -> user.deactivate();
             case SUSPENDED -> user.suspended();
-            default -> throw new IllegalArgumentException("Estado no valido: " + newStatus);
+            default -> throw new InvalidOperationException(
+                    "Estado no válido: " + newStatus);
         }
         return userRepositoryPort.save(user);
     }
@@ -63,13 +67,14 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
     @Override
     public User getById(Long id){
         return userRepositoryPort.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("Usuario no encontrado con id: " + id));
+                .orElseThrow(()-> new ResourceNotFoundException("Usuario", id));
     }
 
     @Override
     public User getByEmail(String email){
         return userRepositoryPort.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuaeio no encontrado con email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Usuario", "email", email));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.af.estrategiafinanciera.domain.service;
 
+import com.af.estrategiafinanciera.domain.exception.InvalidOperationException;
+import com.af.estrategiafinanciera.domain.exception.ResourceNotFoundException;
 import com.af.estrategiafinanciera.domain.model.Plan;
 import com.af.estrategiafinanciera.domain.model.Subscription;
 import com.af.estrategiafinanciera.domain.model.SubscriptionStatus;
@@ -34,31 +36,22 @@ public class SubscriptionService implements CreateSubscriptionUseCase,
     @Override
     public Subscription subscribe(Long userId, Long planId) {
         User user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "El usuario no encotrado con id " + userId
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", userId));
 
         if (!user.isActive()){
-            throw new IllegalArgumentException(
-                    "El usuario " + user.getName() + "no esta activo"
-            );
+            throw new InvalidOperationException("El Usuario " + user.getId() + " no esta activo");
         }
 
         Plan plan = planRepositoryPort.findByid(planId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No se encontro plan con id " + planId
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", userId));
 
         if (!plan.isActive()){
-            throw new IllegalArgumentException(
-                    "El plan " + plan.getName() + " con id " + planId + " No esta activo en este momento"
-            );
+            throw new InvalidOperationException("El plan " + plan.getName() + " con id " + planId + " No esta activo en este momento");
         }
 
         if (subscriptionRepositoryPort.existsActiveSubscriptionByUserIdAndPlanId(userId, planId)){
-            throw new IllegalArgumentException(
-                    "Ya tienes una subscripcion activa en este plan."
-            );
+            throw new InvalidOperationException("Ya tienes una suscripción activa para este plan");
+
         }
 
         LocalDate startDate = LocalDate.now();
@@ -82,15 +75,15 @@ public class SubscriptionService implements CreateSubscriptionUseCase,
     @Override
     public Subscription updateStatus(Long subscriptionId, SubscriptionStatus status) {
         Subscription subscription = subscriptionRepositoryPort.findByid(subscriptionId)
-                .orElseThrow(()-> new IllegalArgumentException(
-                        "No se encontro Suscripcion con id " + subscriptionId
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "Suscripcion", subscriptionId
                 ));
         switch (status){
             case ACTIVE -> subscription.activate();
             case PAUSED -> subscription.pause();
             case EXPIRED -> subscription.expire();
             case CANCELLED -> subscription.cancel();
-            default -> throw new IllegalArgumentException(
+            default -> throw new InvalidOperationException(
                     "Estado no valido: " + status
             );
         }
@@ -102,8 +95,8 @@ public class SubscriptionService implements CreateSubscriptionUseCase,
     @Override
     public Subscription getById(Long id) {
         return subscriptionRepositoryPort.findByid(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No se encontro suscripcion con id " + id
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Suscripcion", id
                 ));
     }
 

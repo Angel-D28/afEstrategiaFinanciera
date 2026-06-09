@@ -8,6 +8,8 @@ import com.af.estrategiafinanciera.domain.port.in.CreateSubscriptionUseCase;
 import com.af.estrategiafinanciera.domain.port.in.GetSubscriptionUseCase;
 import com.af.estrategiafinanciera.domain.port.in.GetUserUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdateSubscriptionStatusUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
+@Tag(name = "Suscripciones", description = "Gestión de suscripciones a planes")
 public class SubscriptionController {
 
     private final CreateSubscriptionUseCase createSubscriptionUseCase;
@@ -31,6 +34,8 @@ public class SubscriptionController {
     // ── Cliente se suscribe ─────────────────────────────────────
     @PostMapping
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
+    @Operation(summary = "Suscribirse a un plan",
+            description = "CLIENT/ADMIN — crea una suscripción PENDING")
     public ResponseEntity<SubscriptionResponse> subscribe(
             @Valid @RequestBody CreateSubscriptionRequest request,
             Authentication authentication ){
@@ -45,6 +50,8 @@ public class SubscriptionController {
     // ── Cliente ve sus suscripciones ────────────────────────────
     @GetMapping("/my")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Mis suscripciones",
+            description = "Retorna las suscripciones del usuario autenticado")
     public ResponseEntity<List<SubscriptionResponse>> getMySubs(Authentication authentication){
         var user = getUserUseCase.getByEmail(authentication.getName());
         List<SubscriptionResponse> subs = getSubscriptionUseCase.getAllByUserId(user.getId())
@@ -57,6 +64,8 @@ public class SubscriptionController {
     // ── Solo ADMIN ───────────────────────────────────────────────
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Listar suscripciones",
+            description = "Solo ADMIN")
     public ResponseEntity<List<SubscriptionResponse>> getAll(){
         List<SubscriptionResponse> subs = getSubscriptionUseCase.getAll().stream()
                 .map(this::toResponse)
@@ -67,6 +76,8 @@ public class SubscriptionController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Buscar suscripción por ID",
+            description = "Solo ADMIN")
     public ResponseEntity<SubscriptionResponse> getById(
             @PathVariable Long id
     ){
@@ -76,6 +87,8 @@ public class SubscriptionController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Cambiar estado de suscripción",
+            description = "Solo ADMIN — valores: ACTIVE, PAUSED, CANCELLED")
     public ResponseEntity<SubscriptionResponse> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateSubscriptionStatusRequest request) {

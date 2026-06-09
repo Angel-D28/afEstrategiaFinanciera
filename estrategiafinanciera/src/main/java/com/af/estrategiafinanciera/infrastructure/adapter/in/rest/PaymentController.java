@@ -7,6 +7,8 @@ import com.af.estrategiafinanciera.domain.model.Payment;
 import com.af.estrategiafinanciera.domain.port.in.CreatePaymentUseCase;
 import com.af.estrategiafinanciera.domain.port.in.GetPaymentUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdatePaymentStatusUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,9 @@ public class PaymentController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Tag(name = "Pagos", description = "Gestión de pagos de suscripciones")
+    @Operation(summary = "Registrar pago",
+            description = "Solo ADMIN — registra un pago en estado PENDING")
     public ResponseEntity<PaymentResponse> register(
             @Valid @RequestBody CreatePaymentRequest request){
         Payment payment = createPaymentUseCase.registerPayment(
@@ -42,6 +47,8 @@ public class PaymentController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Listar pagos",
+            description = "Solo ADMIN")
     public ResponseEntity<List<PaymentResponse>> getAll(){
         List<PaymentResponse> payments = getPaymentUseCase.getAll()
                 .stream()
@@ -53,6 +60,8 @@ public class PaymentController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Buscar pago por ID",
+            description = "Solo ADMIN")
     public ResponseEntity<PaymentResponse> getById(@PathVariable Long id){
         Payment payment = getPaymentUseCase.getByid(id);
         return ResponseEntity.ok(toResponse(payment));
@@ -60,6 +69,8 @@ public class PaymentController {
 
     @GetMapping("/subscription/{subscriptionId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Pagos por suscripción",
+            description = "Solo ADMIN")
     public ResponseEntity<List<PaymentResponse>> getBySubscription(
             @PathVariable Long subscriptionId) {
         List<PaymentResponse> payments = getPaymentUseCase
@@ -72,6 +83,8 @@ public class PaymentController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Cambiar estado del pago",
+            description = "Solo ADMIN — valores: COMPLETED, FAILED, REFUNDED")
     public ResponseEntity<PaymentResponse> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePaymentStatusRequest request) {

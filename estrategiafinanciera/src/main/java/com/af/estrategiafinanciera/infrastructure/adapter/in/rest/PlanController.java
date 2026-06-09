@@ -9,6 +9,8 @@ import com.af.estrategiafinanciera.domain.model.PlanStatus;
 import com.af.estrategiafinanciera.domain.port.in.CreatePlanUseCase;
 import com.af.estrategiafinanciera.domain.port.in.GetPlanUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdatePlanUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +23,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/plans")
 @RequiredArgsConstructor
-public class PlanCotroller {
+@Tag(name = "Planes", description = "Gestión de planes de asesoría financiera")
+public class PlanController {
     private final CreatePlanUseCase createPlanUseCase;
     private final UpdatePlanUseCase updatePlanUseCase;
     private final GetPlanUseCase getPlanUseCase;
 
     @GetMapping("/active")
+    @Operation(summary = "Planes activos",
+            description = "Público — lista los planes disponibles")
     public ResponseEntity<List<PlanResponse>> getAllActive(){
         List<PlanResponse> plans = getPlanUseCase.getAllActive()
                 .stream()
@@ -36,6 +41,8 @@ public class PlanCotroller {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Buscar plan por ID",
+            description = "Público")
     public ResponseEntity<PlanResponse> getById(@PathVariable Long id){
         Plan plan = getPlanUseCase.getByid(id);
         return ResponseEntity.ok(toResponse(plan));
@@ -45,6 +52,8 @@ public class PlanCotroller {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Listar todos los planes",
+            description = "Solo ADMIN — incluye borradores e inactivos")
     public ResponseEntity<List<PlanResponse>> getAll(){
         List<PlanResponse> plans = getPlanUseCase.getAll()
                 .stream()
@@ -56,6 +65,8 @@ public class PlanCotroller {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Crear plan",
+            description = "Solo ADMIN — el plan inicia en estado DRAFT")
     public ResponseEntity<PlanResponse> create(
             @Valid @RequestBody CreatePlanRequest request
             ){
@@ -71,6 +82,8 @@ public class PlanCotroller {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Actualizar plan",
+            description = "Solo ADMIN")
     public ResponseEntity<PlanResponse>update(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePlanRequest request
@@ -88,6 +101,8 @@ public class PlanCotroller {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Cambiar estado del plan",
+            description = "Solo ADMIN — valores: ACTIVE, INACTIVE, DRAFT")
     public ResponseEntity<PlanResponse> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePlanStatusRequest request
@@ -98,6 +113,8 @@ public class PlanCotroller {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Desactivar plan",
+            description = "Solo ADMIN — cambia estado a INACTIVE")
     public ResponseEntity<PlanResponse> delete(@PathVariable Long id){
         updatePlanUseCase.updateStatus(id,
                 PlanStatus.INACTIVE);

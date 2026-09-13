@@ -14,3 +14,12 @@ const baseInputStyles =
 export function TextInput(props) {
   return <input {...props} className={`${baseInputStyles} ${props.className ?? ''}`} />
 }
+
+export function Textarea(props) {
+  return (
+    <textarea
+      {...props}
+      className={`${baseInputStyles} min-h-[6rem] resize-y ${props.className ?? ''}`}
+    />
+  )
+}

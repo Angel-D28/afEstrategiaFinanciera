@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getAllPlans } from '../../api/planService'
 
 const currencyFormatter = new Intl.NumberFormat('es-CO', {
@@ -33,6 +34,12 @@ export function PlansAdmin() {
     <section className="py-4">
       <div className="flex items-center justify-between">
         <p className="font-display text-3xl text-ink">Planes</p>
+        <Link
+          to="/admin/planes/nuevo"
+          className="rounded-sm bg-primary px-4 py-2 text-sm text-ink hover:bg-primary-dark"
+        >
+          Nuevo plan
+        </Link>
       </div>
       <p className="mt-2 text-ink/70">
         Todos los planes registrados, activos e inactivos.

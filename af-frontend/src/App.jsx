@@ -11,6 +11,7 @@ import { NotFound } from './pages/NotFound'
 import { MyAccount } from './pages/client/MyAccount'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { PlansAdmin } from './pages/admin/PlansAdmin'
+import { PlanForm } from './pages/admin/PlanForm'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'AGENT']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/planes" element={<PlansAdmin />} />
+              <Route path="/admin/planes/nuevo" element={<PlanForm />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

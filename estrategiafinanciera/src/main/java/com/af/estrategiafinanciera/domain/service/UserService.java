@@ -8,6 +8,7 @@ import com.af.estrategiafinanciera.domain.model.User;
 import com.af.estrategiafinanciera.domain.model.UserStatus;
 import com.af.estrategiafinanciera.domain.port.in.GetUserUseCase;
 import com.af.estrategiafinanciera.domain.port.in.RegisterUserUseCase;
+import com.af.estrategiafinanciera.domain.port.in.UpdateUserRoleUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdateUserStatusUseCase;
 import com.af.estrategiafinanciera.domain.port.out.PasswordEncoderPort;
 import com.af.estrategiafinanciera.domain.port.out.UserRepositoryPort;
@@ -15,7 +16,7 @@ import com.af.estrategiafinanciera.domain.port.out.UserRepositoryPort;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase, GetUserUseCase {
+public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase, GetUserUseCase, UpdateUserRoleUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordEncoderPort passwordEncoderPort;
@@ -86,5 +87,24 @@ public class UserService implements RegisterUserUseCase, UpdateUserStatusUseCase
     public List<User> getAllByRole(String role){
         Role enumRole = Role.valueOf(role.toUpperCase());
         return userRepositoryPort.findAllByRole(enumRole);
+    }
+
+    //UpdateUserRoleUseCase
+
+    @Override
+    public User updateRole(Long userId, Role newRole) {
+        User user = userRepositoryPort.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario " ,userId));
+
+        //no se puede cambiar el rol de un usuario suspendido
+        if (user.getStatus() == UserStatus.SUSPENDED){
+            throw new InvalidOperationException(
+                    "No se puede cambiar el role de un usuario suspendido"
+            );
+        }
+        user.setRole(newRole);
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+
+        return userRepositoryPort.save(user);
     }
 }

@@ -1,11 +1,13 @@
 package com.af.estrategiafinanciera.infrastructure.adapter.in.rest;
 
 import com.af.estrategiafinanciera.application.dto.CreateUserRequest;
+import com.af.estrategiafinanciera.application.dto.UpdateUserRoleRequest;
 import com.af.estrategiafinanciera.application.dto.UpdateUserStatusRequest;
 import com.af.estrategiafinanciera.application.dto.UserResponse;
 import com.af.estrategiafinanciera.domain.model.User;
 import com.af.estrategiafinanciera.domain.port.in.GetUserUseCase;
 import com.af.estrategiafinanciera.domain.port.in.RegisterUserUseCase;
+import com.af.estrategiafinanciera.domain.port.in.UpdateUserRoleUseCase;
 import com.af.estrategiafinanciera.domain.port.in.UpdateUserStatusUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +30,7 @@ public class UserController {
     private final RegisterUserUseCase registerUserUseCase;
     private final UpdateUserStatusUseCase updateUserStatusUseCase;
     private final GetUserUseCase getUserUseCase;
+    private final UpdateUserRoleUseCase updateUserRoleUseCase;
 
     //Publico
     // POST /api/users/register
@@ -99,6 +102,15 @@ public class UserController {
     public ResponseEntity<UserResponse> getMyProfile(
             org.springframework.security.core.Authentication authentication){
         User user = getUserUseCase.getByEmail(authentication.getName());
+        return ResponseEntity.ok(toResponse(user));
+    }
+
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Cambiar rol de usuario",
+            description = "Solo ADMIN — valores: ADMIN, AGENT, CLIENT")
+    public ResponseEntity<UserResponse> updateRole(@PathVariable Long id, @Valid @RequestBody UpdateUserRoleRequest request){
+        User user = updateUserRoleUseCase.updateRole(id, request.role());
         return ResponseEntity.ok(toResponse(user));
     }
 

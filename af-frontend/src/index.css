@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Color tokens: identidad real de AF Estrategia Financiera
+     (navy oscuro + azul de marca + dorado, tomados de su Instagram). */
+  --color-ink: #f5f7fa;
+  --color-paper: #0b1930;
+  --color-paper-dim: #12233f;
+  --color-primary: #1b4f91;
+  --color-primary-dark: #143a6b;
+  --color-accent: #d4a62c;
+  --color-accent-dark: #b98f22;
+  --color-sage: #8a96a8;
+  --color-sage-light: #5f6b7d;
+  --color-line: #1f3352;
+  --color-danger: #e2574c;
+  --color-danger-bg: #3a1a17;
+  --color-success: #3fa66b;
+  --color-success-bg: #123423;
+
+  --font-display: 'Sora', sans-serif;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-paper);
+}

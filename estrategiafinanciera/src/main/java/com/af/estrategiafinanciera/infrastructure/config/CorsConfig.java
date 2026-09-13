@@ -28,6 +28,13 @@ public class CorsConfig {
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
         ));
 
+        // Sin esta línea, Spring no permite NINGÚN header en el preflight
+        // (incluido Content-Type, que Axios manda siempre al enviar JSON),
+        // así que rechaza la petición antes de llegar a tu controlador.
+        config.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type", "Accept"
+        ));
+
         // Headers expuestos al frontend
         config.setExposedHeaders(List.of(
                 "Authorization"

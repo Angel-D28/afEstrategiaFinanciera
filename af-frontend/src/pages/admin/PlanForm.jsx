@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { createPlan } from '../../api/planService'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { createPlan, getPlanById, updatePlan } from '../../api/planService'
 import { FormField, TextInput, Textarea } from '../../components/FormField'
 
 const initialForm = {
@@ -11,11 +11,40 @@ const initialForm = {
   features: '',
 }
 
+// Convierte un plan traído del backend (tipos correctos: number, array)
+// al formato que necesitan los <input>/<textarea> (todo string).
+function planToFormValues(plan) {
+  return {
+    name: plan.name ?? '',
+    description: plan.description ?? '',
+    price: String(plan.price ?? ''),
+    durationMonths: String(plan.durationMonths ?? ''),
+    features: Array.isArray(plan.features) ? plan.features.join('\n') : '',
+  }
+}
+
 export function PlanForm() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditMode = Boolean(id)
+
   const [form, setForm] = useState(initialForm)
-  const [loading, setLoading] = useState(false)
+  // "loadingPlan" solo aplica en modo edición, mientras traemos los datos
+  // existentes; "saving" aplica a ambos modos, al enviar el formulario.
+  const [loadingPlan, setLoadingPlan] = useState(isEditMode)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!isEditMode) return
+
+    getPlanById(id)
+      .then((plan) => setForm(planToFormValues(plan)))
+      .catch(() =>
+        setError('No pudimos cargar los datos de este plan.')
+      )
+      .finally(() => setLoadingPlan(false))
+  }, [id, isEditMode])
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
@@ -23,13 +52,9 @@ export function PlanForm() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     setError(null)
 
-    // El formulario guarda todo como texto (así funcionan los inputs de
-    // HTML). Antes de mandarlo al backend lo convertimos a los tipos que
-    // espera el DTO: price y durationMonths como número, features como
-    // arreglo de strings (una por línea, descartando líneas vacías).
     const payload = {
       name: form.name,
       description: form.description,
@@ -42,25 +67,37 @@ export function PlanForm() {
     }
 
     try {
-      await createPlan(payload)
+      if (isEditMode) {
+        await updatePlan(id, payload)
+      } else {
+        await createPlan(payload)
+      }
       navigate('/admin/planes')
     } catch (err) {
       const message =
         err.response?.data?.message ||
-        'No pudimos crear el plan. Revisa los datos e intenta de nuevo.'
+        `No pudimos ${isEditMode ? 'actualizar' : 'crear'} el plan. Revisa los datos e intenta de nuevo.`
       setError(message)
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
+  }
+
+  if (loadingPlan) {
+    return <p className="py-8 text-sage">Cargando plan…</p>
   }
 
   return (
     <section className="mx-auto max-w-lg py-4">
-      <p className="font-display text-3xl text-ink">Nuevo plan</p>
-      <p className="mt-2 text-ink/70">
-        Se crea en estado <span className="text-accent">DRAFT</span>; lo
-        activas después desde la lista de planes.
+      <p className="font-display text-3xl text-ink">
+        {isEditMode ? 'Editar plan' : 'Nuevo plan'}
       </p>
+      {!isEditMode && (
+        <p className="mt-2 text-ink/70">
+          Se crea en estado <span className="text-accent">DRAFT</span>; lo
+          activas después desde la lista de planes.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <FormField label="Nombre del plan">
@@ -122,10 +159,14 @@ export function PlanForm() {
         <div className="flex gap-3">
           <button
             type="submit"
-            disabled={loading}
+            disabled={saving}
             className="rounded-sm bg-primary px-4 py-2.5 text-ink hover:bg-primary-dark disabled:opacity-60"
           >
-            {loading ? 'Creando…' : 'Crear plan'}
+            {saving
+              ? 'Guardando…'
+              : isEditMode
+                ? 'Guardar cambios'
+                : 'Crear plan'}
           </button>
           <Link
             to="/admin/planes"

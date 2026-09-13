@@ -35,6 +35,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/planes" element={<PlansAdmin />} />
               <Route path="/admin/planes/nuevo" element={<PlanForm />} />
+              <Route path="/admin/planes/:id/editar" element={<PlanForm />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
